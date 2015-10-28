@@ -7,7 +7,7 @@ torrc_exit_relay: torrc config for an or relay that is also an exit
 torrc_relay: torrc config for a plain old or  
 
 create-container.sh: run outside the container (I'm just using for reference and not actually running it)  
-setup-container.sh: run inside the container (less typing!) 
+setup-container.sh: run inside the container (less typing!)   
 burrito.sh: test latency of transferring extra-large 521 GB file "burrito"  
 ramp.sh: test latency of transferring larger and larger files, ranging from 1 KB to 1 GB  
 
