@@ -10,16 +10,16 @@ DataDirectory /var/lib/tor
 ShutdownWaitLength 0 
 PidFile /var/lib/tor/pid
 ProtocolWarnings 1
-DirAuthority no orport=9052 no-v2 v3ident=<ident 1> <authority ip>:9051 <ident 2>
+DirAuthority no orport=9052 no-v2 v3ident=<i1> <ip>:9051 <i2>
 
 SocksPort 0
 SocksPolicy accept *
 ConnLimit 60
-OrPort 9053
-Address <ip>
-Nickname one
-ContactInfo Random Person1 one@no.com
-ExitPolicy accept *:* #all exits allowed (this is our designated "exit relay"
+OrPort 9054
+Address <my ip>
+Nickname two
+ContactInfo Random Person2 two@no.com
+ExitPolicy reject *:* #all exits rejected!
 
 ############### This section is just for location-hidden services ###
 
