@@ -1,0 +1,109 @@
+#!/bin/bash
+
+# copyright (c) Kelly Nicole Kaoudis, 2015
+
+# Runs two tests over my cute little testing Tor network using a slightly 
+# modified trivsocks-client, a minimal SOCKS client available from 
+# https://git.torproject.org/torperf.git (this could be easily modified 
+# to run on the big daddy Tor):
+# 	(1) ramp
+#		- looks at latency of downloading files of varying sizes
+#		- uses some example files grabbed from the wikileaks public 
+#		archive, and some example files written out of /dev/urandom
+#	(2) burrito
+#		- looks at latency of downloading a 521 GB file "burrito" 
+#		- (a) chunked prior to transfer, with chunks transfers spaced 
+#		      over time
+#		- (b) attempt to transfer all at once
+#		- (c) attempt to transfer *while running ramp.sh* as well
+###############################################################################
+options () {
+	echo "tor-dock latency tests: usage ./latenc <filedir>"
+	echo "<filedir>: directory of files you want to use for transfer "\
+	"tests, which should also include some large file with a name includin"\
+	"g 'burrito' to be used for the burrito test."
+	exit 1
+}
+
+# shamelessly adapted from torperf/run_test.py
+write_header () {
+	touch $1
+	echo "startsec startusec "\
+	     "socketsec socketusec "\
+	     "connectsec connectusec "\
+	     "negotiatesec negotiateusec "\
+	     "requestsec requestusec "\
+	     "responsesec responseusec"\
+	     "datarequestsec datarequestusec"\
+	     "dataresponsesec dataresponseusec"\
+	     "datacompletesec datacompleteusec"\
+             "writebytes readbytes" >> $1
+}
+
+ramp_setup () {
+	# places to store our tor instance logs and other relevant output
+	mkdir -p chopin tosec charterhouse spam mp4
+
+	cp torrc chopin/torrc
+	cp torrc tosec/torrc
+	cp torrc charterhouse/torrc
+	cp torrc spam/torrc
+	cp torrc mp4/torrc
+
+	write_header chopin/chopin.data
+	write_header tosec/tosec.data
+	write_header charterhouse/charterhouse.data
+	write_header spam/spam.data
+	write_header mp4/mp4.data
+}
+
+ramp () {
+	cd ./chopin && tor -f ./torrc &
+	cd ./tosec && tor -f ./torrc &
+	cd ./charterhouse && tor -f ./torrc &
+	cd ./spam && tor -f ./torrc &
+	cd ./mp4 && tor -f ./torrc &
+
+	./trivsocks files/chopin.tar.gz >> chopin/chopin.data 2>/dev/null &
+	./trivsocks files/tosec.zip >> tosec/tosec.data 2>/dev/null &
+	./trivsocks files/charterhouse.zip >> charterhouse/charterhouse.data 2>/dev/null &
+	./trivsocks files/spam.pdf >> spam/spam.data 2>/dev/null &
+	./trivsocks files/17_big.mp4 >> mp4/mp4.data 2>/dev/null & 
+}
+
+burrito_setup () {
+	mkdir -p burrito
+	cp torrc burrito/torrc
+	write_header burrito/burrito_chunks.data
+	write_header burrito/burrito_fast.data
+	write_header burrito/burrito_plus.data
+}
+
+burrito () {
+}
+
+# plot results of test and save plot in ./plots/
+make_plots () {
+
+
+}
+
+# get rid of anything extraneous in the cwd
+cleanup () {
+
+
+}
+
+run () {
+	if [ ! -d "$1" ]; then
+		options
+	fi
+
+	ramp_setup
+	
+	burrito_setup
+
+	cleanup
+}
+
+run
