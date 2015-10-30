@@ -1,6 +1,7 @@
 # tor-dock
 Helpful stuff for latency testing over a *private* (not connected to the real one) Tor network comprised of Docker containers.
-Note that the configs in this directory have a setting called TestingTorNetwork: hopefully, this means we stay in our own LAN.
+Note that the configs in this directory have a setting called TestingTorNetwork: hopefully, this means we stay in our own 
+overlay "LAN".
 
 torrc: tor config *for our test client* not for ORs or the dirserver  
 torrc_auth: torrc config for the directory server  
