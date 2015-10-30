@@ -8,7 +8,7 @@ torrc_relay: torrc config for a plain old or
 
 create-container.sh: run outside the container (I'm just using for reference and not actually running it)  
 setup-container.sh: run inside the container (less typing!)   
-burrito.sh: test latency of transferring extra-large 521 GB file "burrito"  
-ramp.sh: test latency of transferring larger and larger files, ranging from 1 KB to 1 GB  
+latenc: set up and run latency testing over our mini Tor  
+c/ contains the torperf 'trivsocks' client  
 
 *None* of this is supposed to, at any time, connect to the actual big grand Tor network. That said, use at your own risk.
