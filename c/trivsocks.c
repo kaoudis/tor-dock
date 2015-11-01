@@ -23,6 +23,26 @@
 #define HTTP_BUF_LEN 256
 #define HTTP_READ_LEN 16 // Must be <= (HTTP_BUF_LEN - 1)
 
+// Timestamps of important events
+struct timeval starttime; // Connection process started
+struct timeval sockettime; // After socket is created
+struct timeval connecttime; // After socket is connected
+struct timeval negotiatetime; // After authentication methods are negotiated (SOCKS 5 only)
+struct timeval requesttime; // After SOCKS request is sent
+struct timeval responsetime; // After SOCKS response is received
+struct timeval datarequesttime; // After HTTP request is written
+struct timeval dataresponsetime; // After first response is received
+struct timeval datacompletetime; // After payload is complete
+// After (i + 1) * 10% of expected bytes are received
+struct timeval dataperctime[9];
+
+// Data counters of SOCKS payload
+size_t read_bytes;
+size_t write_bytes;
+
+// Did we get killed by the bash 'timeout' widget?
+int didtimeout;
+
 static void usage(void) __attribute__((noreturn));
 
 
@@ -287,26 +307,6 @@ int do_http_get(int s, const char *path, const char *hostname,
 static int print_time(struct timeval t) {
  	return printf("%ld %ld ", (long int)t.tv_sec, (long int)t.tv_usec);
 }
-
-// Timestamps of important events
-struct timeval starttime; // Connection process started
-struct timeval sockettime; // After socket is created
-struct timeval connecttime; // After socket is connected
-struct timeval negotiatetime; // After authentication methods are negotiated (SOCKS 5 only)
-struct timeval requesttime; // After SOCKS request is sent
-struct timeval responsetime; // After SOCKS response is received
-struct timeval datarequesttime; // After HTTP request is written
-struct timeval dataresponsetime; // After first response is received
-struct timeval datacompletetime; // After payload is complete
-// After (i + 1) * 10% of expected bytes are received
-struct timeval dataperctime[9];
-
-// Data counters of SOCKS payload
-size_t read_bytes;
-size_t write_bytes;
-
-// Did we get killed by the bash 'timeout' widget?
-int didtimeout;
 
 static void output_status_information(void) {
   	int i;
