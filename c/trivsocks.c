@@ -4,18 +4,20 @@
 
 #include "util.h"
 
+#include <errno.h>
+#include <netdb.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
+#include <stdint.h>
 #include <string.h>
-#include <signal.h>
+#include <unistd.h>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <errno.h>
 
 #define RESPONSE_LEN_4 8
 #define RESPONSE_LEN_5 4
@@ -464,7 +466,7 @@ static int do_connect(const char *hostname, const char *filename,
 }
 
 static void usage() {
-  	puts("Usage: ./trivsocks [ -4 | -5 | -x ] address:port path-to-file exp-bytes");
+  	puts("Usage: ./trivsocks [ -4 | -5 | -x ] -a <address> -p <portno> -f <file> -b exp-bytes");
   	exit(0);
 }
 
@@ -487,50 +489,86 @@ int main(int argc, char **argv) {
   	char *result_hostname = NULL;
   	char *hostname = NULL;
 	char *filename = NULL;
-	int isSocks4 = 0;
+	int opt;
+	int isSocks4a = 0;
+	int isSocks5 = 0;
 	int isReverse = 0;
   	size_t expbytes = 0;
+	struct hostent *hp;
+	struct in_addr *myaddr;
 	uint16_t socksport = 0;
 	uint32_t sockshost;
   	uint32_t result = 0;
 
   	signal(SIGINT, termination_handler);
 
-  	if (argc == 1) usage();
- 
-	if (!strcmp("-4", argv[1]))
-      		isSocks4 = 1;
-    	else if (!strcmp("-5", argv[1]))
-      		isSocks4 = 0;
-    	else if (!strcmp("-x", argv[1]))
-      		isReverse = 1;
-    	else {
-      		fprintf(stderr, "Unrecognized flag '%s'\n", argv[1]);
-      		usage();
-    	}
+  	if (argc < 3) usage();
 
-  	if (isSocks4 && isReverse) {
+	while ((opt = getopt(argc, argv, "x45b:f:a:p:")) != -1) {
+		switch (opt) {
+			case 'x':
+				isReverse = 1;
+				break;
+			case '4':
+				isSocks4a = 1;
+				break;
+			case '5':
+				isSocks5 = 1;
+				break;
+			case 'b':
+				if (filename != NULL) {
+    					expbytes = (size_t) parse_long(filename, 
+						10, 0, 1024*1024*1024, NULL, NULL);
+				} else {
+					puts("Please provide a filename with -f b"\
+					"efore specifying the number of expected "\
+					"bytes with -b.");
+					exit(0);
+				}
+
+				break;
+			case 'f':
+				filename = strdup(optarg);
+				break;
+			case 'a': // hostname and SOCKS host address
+				hostname = strdup(optarg);
+				if (((hp = gethostbyname(hostname)) == NULL) || 
+				    (hp->h_addrtype != AF_INET)) {
+					usage();
+					exit(0);
+				}
+				
+				myaddr = (struct in_addr *) hp->h_addr_list[0];
+				if (myaddr == NULL) {
+					usage();
+					exit(0);
+				}		
+
+				sockshost = ntohl(myaddr->s_addr);
+				break;
+			case 'p':
+				socksport = atoi(optarg);
+				break;
+			case 'h':
+			case '?':
+			default:
+				usage();
+				break;
+		}
+	}
+ 
+  	if (isSocks4a && isReverse) {
     		fprintf(stderr, "Reverse lookups not supported with SOCKS4a\n");
     		usage();
   	}
 
-    	if (parse_addr_port(0, argv[2], NULL, &sockshost, &socksport) < 0) {
-      		fprintf(stderr, "Couldn't parse/resolve %s\n", argv[2]);
-      		return 1;
-    	}
-
     	if (!socksport) {
-      		fprintf(stderr,"defaulting to port 9050\n");
+      		fprintf(stderr,"No socksport given; defaulting to port 9050\n");
       		socksport = 9050;
     	}
 
-    	hostname = "localhost";
-    	filename = strdup(argv[3]);
-
-    	expbytes = (size_t) parse_long(argv[3], 10, 0, 1024*1024*1024, NULL, NULL);
-
   	if (do_connect(hostname, filename, sockshost, socksport, isReverse, 
-		       isSocks4 ? 4 : 5, expbytes, &result, &result_hostname))
+		       isSocks4a ? 4 : 5, expbytes, &result, &result_hostname))
 		return 1;
 
   	return 0;
