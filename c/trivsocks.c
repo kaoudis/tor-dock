@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include <assert.h>
 #include <signal.h>
 
 #include <netinet/in.h>
@@ -54,10 +53,6 @@ static int build_socks_connect_request(char **out, const char *username,
                             	       int version) {
   	size_t len = 0;
   
-	assert(out);
-  	assert(username);
-  	assert(hostname);
-
   	if (version == 4) {
     		len = 8 + strlen(username) + 1 + strlen(hostname) + 1;
     		*out = malloc(len);
@@ -94,8 +89,8 @@ static int build_socks_connect_request(char **out, const char *username,
     		}
     
 		set_uint16((*out)+4+addrlen, htons(80)); /* port */
-  	} else 
-    		assert(0);
+
+  	} else exit(0);
 
   	return len;
 }
@@ -106,11 +101,8 @@ static int build_socks_connect_request(char **out, const char *username,
  */
 static int parse_socks4a_connect_response(const char *response, size_t len,
                                uint32_t *addr_out) {
-  	uint8_t status;
+  	uint8_t status = 0;
   	
-	assert(response);
-  	assert(addr_out);
-
   	if (len < RESPONSE_LEN_4) {
     		fprintf(stderr, "Truncated socks response.\n");
     		return -1;
@@ -343,11 +335,6 @@ static int do_connect(const char *hostname, const char *filename,
   	int len = 0;
   	int retval;
   	struct sockaddr_in socksaddr;
-
-  	assert(hostname);
-  	assert(filename);
-  	assert(result_addr);
-  	assert(version == 4 || version == 5);
 
   	*result_addr = 0;
   	*result_hostname = NULL;
