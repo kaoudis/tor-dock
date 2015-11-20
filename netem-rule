@@ -35,4 +35,17 @@ qdisc netem 8006: dev veth5254f9d root refcnt 2 limit 1000 delay 150.0ms  100.0m
 qdisc netem 8007: dev vethe71416a root refcnt 2 limit 1000 delay 150.0ms  100.0ms
 qdisc netem 8008: dev veth8d0162a root refcnt 2 limit 1000 corrupt 2%
 
+# and another random rule because why not
+sudo tc qdisc change dev veth58f245a root netem delay 5ms reorder 25% 10%
+
+~$ sudo tc qdisc show
+qdisc pfifo_fast 0: dev eth0 root refcnt 2 bands 3 priomap  1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1
+qdisc netem 8001: dev veth58f245a root refcnt 2 limit 1000 delay 5.0ms reorder 25% 10% gap 1
+qdisc netem 8002: dev veth6e95cd8 root refcnt 2 limit 1000 delay 150.0ms  100.0ms
+qdisc netem 8003: dev vethe92ca46 root refcnt 2 limit 1000 delay 150.0ms  100.0ms
+qdisc netem 8004: dev vethd52f894 root refcnt 2 limit 1000 corrupt 2%
+qdisc netem 8005: dev vetha4c2a02 root refcnt 2 limit 1000 delay 150.0ms  100.0ms
+qdisc netem 8006: dev veth5254f9d root refcnt 2 limit 1000 delay 150.0ms  100.0ms
+qdisc netem 8007: dev vethe71416a root refcnt 2 limit 1000 delay 150.0ms  100.0ms
+qdisc netem 8008: dev veth8d0162a root refcnt 2 limit 1000 corrupt 2%
 
