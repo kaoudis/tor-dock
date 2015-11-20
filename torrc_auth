@@ -1,39 +1,26 @@
 TestingTorNetwork 1
-SocksPort 0 # Default: Bind to localhost:9050 for local connections.
+SocksPort 0
 ConnLimit 60
-
 SafeLogging 0
+CellStatistics 1
+DirReqStatistics 1
+EntryStatistics 1
+ConnDirectionStatistics 1
+ExtraInfoStatistics 1
 Log notice file /var/log/tor/notices.log
 Log debug file /var/log/tor/debug.log
-Log notice syslog
-
 RunAsDaemon 1
+AssumeReachable 1
+PublishServerDescriptor v3
 DataDirectory /var/lib/tor
-
-ORPort 9052
-Address <insert IP here>
-Nickname no
-ContactInfo Random Person no@no.com
-
-PidFile /var/lib/tor/pid
+ORPort 9050
+Address <DOCKER CONTAINER IP HERE>
+Nickname dirserver
+ContactInfo Random person no@no.com
+PiDFile /var/lib/tor/pid
 ProtocolWarnings 1
-DirAuthority no orport=9052 no-v2 v3ident=<fingerprint1> <IP address>:9051 <fingerprint2>
+DirAuthority dirserver orport=9050 no-v2 v3ident=<CERTIFICATE FINGERPRINT> <DOCKER CONTAINER IP HERE>:9051 <2nd FINGERPRINT>
 AuthoritativeDirectory 1
 V3AuthoritativeDirectory 1
-DirPort 9051 # what port to advertise for directory connections
-#DirPortFrontPage /etc/tor/tor-exit-notice.html
-ExitPolicy reject *:* # no exits allowed
-
-## Bridge relays (or "bridges") are Tor relays that aren't listed in the
-## main directory. Since there is no complete public list of them, even an
-## ISP that filters connections to all the known Tor relays probably
-## won't be able to block all the bridges. Also, websites won't treat you
-## differently because they won't know you're running Tor. If you can
-## be a real relay, please do; but if not, be a bridge!
-#BridgeRelay 1
-## By default, Tor will advertise your bridge to users through various
-## mechanisms like https://bridges.torproject.org/. If you want to run
-## a private bridge, for example because you'll give out your bridge
-## address manually to your friends, uncomment this line:
-#PublishServerDescriptor 0
-
+DirPort 9051
+ExitPolicy reject *:*
