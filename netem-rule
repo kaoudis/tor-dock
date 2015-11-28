@@ -1,51 +1,45 @@
-# host-side rule for adding delay via tc/netem to container interfaces
-sudo tc qdisc add dev veth58f245a root netem delay 50ms 45ms distribution normal
-sudo tc qdisc add dev veth6e95cd8 root netem delay 50ms 45ms distribution normal 
-sudo tc qdisc add dev vethe92ca46 root netem delay 50ms 45ms distribution normal
-sudo tc qdisc add dev vethd52f894 root netem delay 50ms 45ms distribution normal
-sudo tc qdisc add dev vetha4c2a02 root netem delay 50ms 45ms distribution normal
-sudo tc qdisc add dev veth5304f9d root netem delay 50ms 45ms distribution normal
-sudo tc qdisc add dev vethe71416a root netem delay 50ms 45ms distribution normal
-sudo tc qdisc add dev veth8d0162a root netem delay 50ms 45ms distribution normal
+# in dirserver container
 
-~$ sudo tc qdisc show
-qdisc pfifo_fast 0: dev eth0 root refcnt 2 bands 3 priomap  1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1
-qdisc netem 8001: dev veth58f245a root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8002: dev veth6e95cd8 root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8003: dev vethe92ca46 root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8004: dev vethd52f894 root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8005: dev vetha4c2a02 root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8006: dev veth5304f9d root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8007: dev vethe71416a root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8008: dev veth8d0162a root refcnt 2 limit 450 delay 50.0ms  45.0ms
+# one
+$ tc qdisc add dev eth0 root netem delay 5ms 4ms distribution normal
+$ tc qdisc change dev eth0 root netem delay 5ms 4ms distribution normal corrupt 1%
 
-# now let's add some corrupted packets for extra realism
+$ tc qdisc show
+qdisc netem 8012: dev eth0 root refcnt 2 limit 1000 delay 5.0ms  4.0ms corrupt 1%
 
-sudo tc qdisc change dev veth8d0162a root netem corrupt 2%
-sudo tc qdisc change dev vethd52f894 root netem corrupt 2%
+# two
+$ tc qdisc add dev eth0 root netem delay 1ms 1ms distribution normal corrupt 2%
 
-~$ sudo tc qdisc show
-qdisc pfifo_fast 0: dev eth0 root refcnt 2 bands 3 priomap  1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1
-qdisc netem 8001: dev veth58f245a root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8002: dev veth6e95cd8 root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8003: dev vethe92ca46 root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8004: dev vethd52f894 root refcnt 2 limit 450 corrupt 2%
-qdisc netem 8005: dev vetha4c2a02 root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8006: dev veth5304f9d root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8007: dev vethe71416a root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8008: dev veth8d0162a root refcnt 2 limit 450 corrupt 2%
+$ tc qdisc show
+qdisc netem 8013: dev eth0 root refcnt 2 limit 1000 delay 1.0ms  1.0ms corrupt 2%
 
-# and another random rule because why not
-sudo tc qdisc change dev veth58f245a root netem delay 5ms reorder 30% 15%
+# three
+$ tc qdisc add dev eth0 root netem delay 25ms 25ms distribution normal
 
-~$ sudo tc qdisc show
-qdisc pfifo_fast 0: dev eth0 root refcnt 2 bands 3 priomap  1 2 2 2 1 2 0 0 1 1 1 1 1 1 1 1
-qdisc netem 8001: dev veth58f245a root refcnt 2 limit 450 delay 5.0ms reorder 30% 15% gap 1
-qdisc netem 8002: dev veth6e95cd8 root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8003: dev vethe92ca46 root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8004: dev vethd52f894 root refcnt 2 limit 450 corrupt 2%
-qdisc netem 8005: dev vetha4c2a02 root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8006: dev veth5304f9d root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8007: dev vethe71416a root refcnt 2 limit 450 delay 50.0ms  45.0ms
-qdisc netem 8008: dev veth8d0162a root refcnt 2 limit 450 corrupt 2%
+$ tc qdisc show
+qdisc netem 8015: dev eth0 root refcnt 2 limit 1000 delay 25.0ms  25.0ms
+
+# four
+$ tc qdisc add dev eth0 root netem delay 10ms 8ms distribution normal
+
+$ tc qdisc show
+qdisc netem 8014: dev eth0 root refcnt 2 limit 1000 delay 10.0ms  8.0ms
+
+# five
+$ tc qdisc add dev eth0 root netem delay 2ms 1ms distribution normal
+
+$ tc qdisc show
+qdisc netem 8016: dev eth0 root refcnt 2 limit 1000 delay 2.0ms  1.0ms
+
+# six
+$ tc qdisc add dev eth0 root netem delay 1ms 1ms distribution normal corrupt 1%
+
+$ tc qdisc show
+qdisc netem 8017: dev eth0 root refcnt 2 limit 1000 delay 1.0ms  1.0ms corrupt 1%
+
+# seven
+$ tc qdisc add dev eth0 root netem delay 5ms 4ms distribution normal corrupt 1%
+
+$ tc qdisc show
+qdisc netem 8018: dev eth0 root refcnt 2 limit 1000 delay 5.0ms  4.0ms corrupt 1%
 
